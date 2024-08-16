@@ -732,10 +732,19 @@ Expected<std::vector<OutputVStream>> ConfiguredNetworkGroupBase::create_output_v
     //       In other words, not possible for an output stream to be connected to more than one op
     std::unordered_map<std::string, net_flow::PostProcessOpMetadataPtr> post_process_metadata;
     std::unordered_map<stream_name_t, op_name_t> op_inputs_to_op_name;
-    for (auto &metadata : m_network_group_metadata.m_ops_metadata) {
-        post_process_metadata.insert({metadata->get_name(), metadata});
-        for (auto &input_name : metadata->get_input_names()) {
-            op_inputs_to_op_name.insert({input_name, metadata->get_name()});
+    {
+        // TODO: Apparently Op->get_name() isn't unique among operations
+        //       DFC bug or hailort bug?
+
+        // Quick fix
+        uint32_t idx = 0;
+        for (auto &metadata : m_network_group_metadata.m_ops_metadata) {
+            const auto op_name = metadata->get_name() + std::to_string(idx);
+            post_process_metadata.insert({op_name, metadata});
+            for (auto &input_name : metadata->get_input_names()) {
+                op_inputs_to_op_name.insert({input_name, op_name});
+            }
+            ++idx;
         }
     }
 

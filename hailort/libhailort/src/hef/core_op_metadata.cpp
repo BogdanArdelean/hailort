@@ -472,26 +472,31 @@ Expected<std::vector<hailo_vstream_info_t>> NetworkGroupMetadata::get_output_vst
 
     // Sort vstream infos by sorted_output_names
     hailo_status status = HAILO_SUCCESS;
-    std::sort(output_vstream_infos.begin(), output_vstream_infos.end(),
-        [this, &status](const auto &info1, const auto &info2)
-    {
-        const auto index1 = std::find(m_sorted_output_names.begin(), m_sorted_output_names.end(), std::string(info1.name));
-        const auto index2 = std::find(m_sorted_output_names.begin(), m_sorted_output_names.end(), std::string(info2.name));
 
-        if (m_sorted_output_names.end() == index1) {
-            LOGGER__ERROR("VStream {} not found in sorted output names", info1.name);
-            status = HAILO_INTERNAL_FAILURE;
-            return false;
-        }
+    // TODO: hailo_status Hef::Impl::fill_networks_metadata(...)
+    //       doesn't set the all the output layers in m_sorted_output_names for my network
+    //       Is it a DFC bug or output layer resolution is bugged?
 
-        if (m_sorted_output_names.end() == index2) {
-            LOGGER__ERROR("VStream {} not found in sorted output names", info2.name);
-            status = HAILO_INTERNAL_FAILURE;
-            return false;
-        }
+    // std::sort(output_vstream_infos.begin(), output_vstream_infos.end(),
+    //     [this, &status](const auto &info1, const auto &info2)
+    // {
+    //     const auto index1 = std::find(m_sorted_output_names.begin(), m_sorted_output_names.end(), std::string(info1.name));
+    //     const auto index2 = std::find(m_sorted_output_names.begin(), m_sorted_output_names.end(), std::string(info2.name));
 
-        return index1 < index2;
-    });
+    //     if (m_sorted_output_names.end() == index1) {
+    //         LOGGER__ERROR("VStream {} not found in sorted output names", info1.name);
+    //         status = HAILO_INTERNAL_FAILURE;
+    //         return false;
+    //     }
+
+    //     if (m_sorted_output_names.end() == index2) {
+    //         LOGGER__ERROR("VStream {} not found in sorted output names", info2.name);
+    //         status = HAILO_INTERNAL_FAILURE;
+    //         return false;
+    //     }
+
+    //     return index1 < index2;
+    // });
     CHECK_SUCCESS_AS_EXPECTED(status);
 
     CHECK_AS_EXPECTED(0 != output_vstream_infos.size(), HAILO_NOT_FOUND, "No VStreams where found for network {}", network_name);
