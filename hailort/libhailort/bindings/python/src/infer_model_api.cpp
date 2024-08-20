@@ -355,6 +355,13 @@ void ConfiguredInferModelWrapper::execute_callbacks()
             return;
         }
 
+        // FIX:
+        // std::condition_variable::wait_for will return on timeout even if the predicate is false
+        // front/pop on an empty queue -> undefined behavior
+        if (m_callbacks_queue->empty()) {
+            continue;
+        }
+
         auto cb_status_pair = m_callbacks_queue->front();
 
         m_callbacks_queue->pop();
